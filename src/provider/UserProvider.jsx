@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserContext } from "../context/UserContext";
 
 export const UserProvider = ({ children }) => {
@@ -13,7 +13,23 @@ export const UserProvider = ({ children }) => {
 
   const [users, setUsers] = useState([]);
 
-  let addUser = (userIn) => {
+  // Fetch users from the backend API when the component mounts
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/users");
+        if (!response.ok) throw new Error("Failed to fetch users");
+        const data = await response.json();
+        setUsers(data); // Set users with the fetched data
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []); // Empty dependency array to run only once when the component mounts
+
+  const addUser = (userIn) => {
     if (userIn.uid) {
       // Si tiene UID, actualiza el usuario
       setUsers((prevUsers) =>
@@ -28,7 +44,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  let deleteUser = (id) => {
+  const deleteUser = (id) => {
     setUsers((prevUsers) => prevUsers.filter((user) => user.uid !== id));
   };
 
